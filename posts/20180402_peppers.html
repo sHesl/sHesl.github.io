@@ -89,7 +89,8 @@
   </code></pre>
   <p>Our salt was just a random []byte of len 50, but for our pepper we are using both a much smaller length of 4, and we are limiting the available runes. If we didn't, we'd be dealing with a possible 4294967296 possible peppers (one byte = 2^8 = 256, 4 bytes = 256^4 = 4294967296). 4 runes gives us 4^4 variations, and we can easily adjust this amount by either increasing our length, or our available runes.</p>
   <p>Next, note our very crude mechanism for 'giving up' is an upper limit on the number of iterations we perform.</p>
-  <pre><code>for i := 0; i &lt; 10000000; i++ {...}
+  <pre><code>
+  for i := 0; i &lt; 10000000; i++ {...}
   </code></pre>
   <p>We could have opted for a ms timeout, and tuned accordingly, but both these ideas are undone by the fact we are relying on randomisation to produce our peppers. There is always a chance the prng fails us, producing a false negative.</p>
   <p>Instead, it would be better to increment stepwise through our peppers. My preferred method for this would be to precompute all of the potential pepper values using go generate and check from our first (1111), through to our last (4444). That would save us a ton of work as well!</p>
