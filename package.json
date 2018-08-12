@@ -4,7 +4,7 @@
   "description": "Static site generator for sHesl.github.io",
   "main": "index.html",
   "scripts": {
-    "build": "npx showdown makehtml -i template.md -o blog.html"
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",

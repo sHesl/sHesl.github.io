@@ -1,200 +1,191 @@
-<p><html>
-    <head>
-      <title>Sam Heslop</title>
-      <meta charset="utf-8">
-      <link rel="stylesheet" type="text/css" href="../style.css">
-      <link href="https://fonts.googleapis.com/css?family=Bellefair" rel="stylesheet">
-    </head>
-    <body>
-      <div>
-        <p><a href="https://samheslop.uk" class="me">Sam Heslop</a><p>
-      </div>
-      <div id="md"></p>
-  <h1 id="20180402playingwithpeppers">2018-04-02: Playing With Peppers</h1>
-  <p>Perusing through the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Pepper_(cryptography)">cryptographic peppers</a>, I was curious to see two co-existing definitions for a pepper. </p>
-  <p>The first (and the one I was most familiar with), was an application level secret, often injected as a config value and stored separately from salts/hashes, applied uniformly to all hashes, providing another layer of protection incase of a compromise of the db and hashing implementation. </p>
-  <p>The other however, the one that piqued my curiosity, described a randomly generated value that would be uniquely minted for each operation, appended to the input like a traditional salt/pepper, but would then be discarded. Therefore, whenever comparing hashes, you'd need to brute-force this value, until either you find the pepper that produces the expected hash, or you give-up on/reject the input.</p>
-  <p>This sounds like fun to write! Let's start off with a basic password+salt func, a simple func for generating our salt, and a func for verifying hashes.</p>
-  <pre><code>
-  func salt() []byte {
-    mrand.Seed(time.Now().UnixNano()) // mrand = "math/rand"
-  
-    s := make([]byte, 50)
-    rand.Read(s)
-  
-    return s
+<html>
+  <head>
+    <title>Sam Heslop</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <link href="https://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet">
+  </head>
+  <body>
+    <div>
+      <p><a href="https://samheslop.com" class="me">Sam Heslop</a><p>
+    </div>
+    <div id="md">
+      <h1 id="20180402playingwithpeppers">2018-04-02: Playing With Peppers</h1>
+<p>Perusing through the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Pepper_(cryptography)">cryptographic peppers</a>, I was curious to see two co-existing definitions for a pepper. </p>
+<p>The first (and the one I was most familiar with), was an application level secret, often injected as a config value and stored separately from salts/hashes, applied uniformly to all hashes, providing another layer of protection incase of a compromise of the db and hashing implementation. </p>
+<p>The other however, the one that piqued my curiosity, described a randomly generated value that would be uniquely minted for each operation, appended to the input like a traditional salt/pepper, but would then be discarded. Therefore, whenever comparing hashes, you'd need to brute-force this value, until either you find the pepper that produces the expected hash, or you give-up on/reject the input.</p>
+<p>This sounds like fun to write! Let's start off with a basic password+salt func, a simple func for generating our salt, and a func for verifying hashes.</p>
+<pre><code>func salt() []byte {
+  mrand.Seed(time.Now().UnixNano()) // mrand = "math/rand"
+
+  s := make([]byte, 50)
+  rand.Read(s)
+
+  return s
+}
+
+func sha256WithSalt(p []byte) (h, s []byte) {
+  hasher := sha256.New()
+  s = salt()
+  hasher.Write(s)
+
+  return hasher.Sum(p), s // here, we return both the hash and the salt, ready for storage
+}
+
+func verifySHA256WithSalt(p, s, h []byte) bool {
+  hasher := sha256.New()
+  hasher.Write(s)
+
+  return bytes.Equal(hasher.Sum(p), h)
+}
+</code></pre>
+<p>Pretty standard stuff, so now let's add some pepper to the mix!</p>
+<pre><code>func pepper() []byte {
+  mrand.Seed(time.Now().UnixNano())
+
+  pepperCharacters := []byte("1234") // limit our available runes
+  pepper := make([]byte, 4)
+
+  for i := range pepper {
+    pepper[i] = pepperCharacters[mrand.Intn(4)]
   }
-  
-  func sha256WithSalt(p []byte) (h, s []byte) {
-    hasher := sha256.New()
-    s = salt()
-    hasher.Write(s)
-  
-    return hasher.Sum(p), s // here, we return both the hash and the salt, ready for storage
-  }
-  
-  func verifySHA256WithSalt(p, s, h []byte) bool {
-    hasher := sha256.New()
-    hasher.Write(s)
-  
-    return bytes.Equal(hasher.Sum(p), h)
-  }
-  </code></pre>
-  <p>Pretty standard stuff, so now let's add some pepper to the mix!</p>
-  <pre><code>
-  func pepper() []byte {
-    mrand.Seed(time.Now().UnixNano())
-  
-    pepperCharacters := []byte("1234") // limit our available runes
-    pepper := make([]byte, 4)
-  
-    for i := range pepper {
-      pepper[i] = pepperCharacters[mrand.Intn(4)]
-    }
-  
-    return pepper
-  }
-  
-  func sha256WithSaltAndPepper(p []byte) (h, s []byte) {
-    hasher := sha256.New()
-    s = salt()
+
+  return pepper
+}
+
+func sha256WithSaltAndPepper(p []byte) (h, s []byte) {
+  hasher := sha256.New()
+  s = salt()
+  hasher.Write(s)
+  hasher.Write(pepper())
+
+  return hasher.Sum(p), s // don't return our pepper for storage
+}
+
+func verifySHA256WithSaltAndPepper(p, s, h []byte) bool {
+  hasher := sha256.New()
+
+  for i := 0; i &lt; 10000000; i++ {
     hasher.Write(s)
     hasher.Write(pepper())
-  
-    return hasher.Sum(p), s // don't return our pepper for storage
-  }
-  
-  func verifySHA256WithSaltAndPepper(p, s, h []byte) bool {
-    hasher := sha256.New()
-  
-    for i := 0; i &lt; 10000000; i++ {
-      hasher.Write(s)
-      hasher.Write(pepper())
-  
-      if bytes.Equal(hasher.Sum(p), h) {
-        return true
-      }
-  
-      hasher.Reset()
-    }
-  
-    return false
-  }
-  </code></pre>
-  <p>Hmm, so things are looking a bit different now. We've having to iterate to find our original pepper, but we can still confirm the validity of our input. </p>
-  <p>There are a few interesting things to note here though. The first is these two lines here:</p>
-  <pre><code>
-  pepperCharacters := []byte("1234")
-  pepper := make([]byte, 4)
-  </code></pre>
-  <p>Our salt was just a random []byte of len 50, but for our pepper we are using both a much smaller length of 4, and we are limiting the available runes. If we didn't, we'd be dealing with a possible 4294967296 possible peppers (one byte = 2^8 = 256, 4 bytes = 256^4 = 4294967296). 4 runes gives us 4^4 variations, and we can easily adjust this amount by either increasing our length, or our available runes.</p>
-  <p>Next, note our very crude mechanism for 'giving up' is an upper limit on the number of iterations we perform.</p>
-  <pre><code>
-  for i := 0; i &lt; 10000000; i++ {...}
-  </code></pre>
-  <p>We could have opted for a ms timeout, and tuned accordingly, but both these ideas are undone by the fact we are relying on randomisation to produce our peppers. There is always a chance the prng fails us, producing a false negative.</p>
-  <p>Instead, it would be better to increment stepwise through our peppers. My preferred method for this would be to precompute all of the potential pepper values using go generate and check from our first (1111), through to our last (4444). That would save us a ton of work as well!</p>
-  <pre><code>
-  func main() {
-    f, _ := os.Create("peppers.go")
-  
-    peppers := make([][]byte, 8888)
-    p := 1111
-  
-    for i := 0; i &lt; 8888; i++ {
-      peppers[i] = []byte(strconv.Itoa(p))
-      p++
-    }
-  
-    packageTemplate.Execute(f, struct {
-      Peppers [][]byte
-    }{
-      Peppers: peppers,
-    })
-  }
-  
-  var packageTemplate = template.Must(template.New("").Parse(`
-  // Code generated by go generate; DO NOT EDIT.
-  package main
-  
-  var peppers = [][]byte{
-  {{- range .Peppers }}
-    {{ printf "%#v" . }},
-  {{- end }}
-  }
-  `))
-  </code></pre>
-  <p>This would give us a <code>peppers</code> const in our main package we can iterate through as follows.</p>
-  <pre><code>
-  for i := 0; i &lt; len(peppers); i++ {
-    hasher.Write(s)
-    hasher.Write(peppers[i])
-  
+
     if bytes.Equal(hasher.Sum(p), h) {
-      return true // we managed to brute-force our pepper and get a match on our input, nice!
+      return true
     }
-  
-    hasher.Reset() // we didn't get a hit, either our input is incorrect, or our pepper was wrong, let's try again
+
+    hasher.Reset()
   }
-  </code></pre>
-  <p>We'd also no longer need to generate our pepper in our initial hash operation, we could just choose one of our precomputed values as follows:</p>
-  <pre><code>
-  func pepper() []byte {
-    mrand.Seed(time.Now().UnixNano())
-    return peppers[mrand.Intn(len(peppers))]
+
+  return false
+}
+</code></pre>
+<p>Hmm, so things are looking a bit different now. We've having to iterate to find our original pepper, but we can still confirm the validity of our input. </p>
+<p>There are a few interesting things to note here though. The first is these two lines here:</p>
+<pre><code>pepperCharacters := []byte("1234")
+pepper := make([]byte, 4)
+</code></pre>
+<p>Our salt was just a random []byte of len 50, but for our pepper we are using both a much smaller length of 4, and we are limiting the available runes. If we didn't, we'd be dealing with a possible 4294967296 possible peppers (one byte = 2^8 = 256, 4 bytes = 256^4 = 4294967296). 4 runes gives us 4^4 variations, and we can easily adjust this amount by either increasing our length, or our available runes.</p>
+<p>Next, note our very crude mechanism for 'giving up' is an upper limit on the number of iterations we perform.</p>
+<pre><code>for i := 0; i &lt; 10000000; i++ {...}
+</code></pre>
+<p>We could have opted for a ms timeout, and tuned accordingly, but both these ideas are undone by the fact we are relying on randomisation to produce our peppers. There is always a chance the prng fails us, producing a false negative.</p>
+<p>Instead, it would be better to increment stepwise through our peppers. My preferred method for this would be to precompute all of the potential pepper values using go generate and check from our first (1111), through to our last (4444). That would save us a ton of work as well!</p>
+<pre><code>func main() {
+  f, _ := os.Create("peppers.go")
+
+  peppers := make([][]byte, 8888)
+  p := 1111
+
+  for i := 0; i &lt; 8888; i++ {
+    peppers[i] = []byte(strconv.Itoa(p))
+    p++
   }
-  </code></pre>
-  <p>Another thing to note is the order of our hash operations. We're applying salt &gt; pepper &gt; password, then resetting our hasher to try again. <code>hasher.Sum()</code> doesn't change the underlying hash state, so it would be much better to apply salt &gt; password and then just continually <code>Sum(pepper[i])</code> without needing to <code>hasher.Reset()</code>. Nice.</p>
-  <p>Let's see where we are at now:</p>
-  <pre><code>
-  // Precomputed peppers generated by go generate
-  const peppers = [][]byte{
-    []byte{0x31, 0x31, 0x31, 0x31},
-    []byte{0x31, 0x31, 0x31, 0x32},
-    ...
-    []byte{0x39, 0x39, 0x39, 0x39},
+
+  packageTemplate.Execute(f, struct {
+    Peppers [][]byte
+  }{
+    Peppers: peppers,
+  })
+}
+
+var packageTemplate = template.Must(template.New("").Parse(`
+// Code generated by go generate; DO NOT EDIT.
+package main
+
+var peppers = [][]byte{
+{{- range .Peppers }}
+  {{ printf "%#v" . }},
+{{- end }}
+}
+`))
+</code></pre>
+<p>This would give us a <code>peppers</code> const in our main package we can iterate through as follows.</p>
+<pre><code>for i := 0; i &lt; len(peppers); i++ {
+  hasher.Write(s)
+  hasher.Write(peppers[i])
+
+  if bytes.Equal(hasher.Sum(p), h) {
+    return true // we managed to brute-force our pepper and get a match on our input, nice!
   }
-  
-  func pepper() []byte {
-    mrand.Seed(time.Now().UnixNano())
-    return peppers[mrand.Intn(len(peppers))]
-  }
-  
-  func sha256WithSaltAndPepper(p []byte) (h, s []byte) {
-    hasher := sha256.New()
-    s = salt()
-    hasher.Write(s)
-    hasher.Write(p)
-  
-    return hasher.Sum(pepper()), s
-  }
-  
-  func verifySHA256WithSaltAndPepper(p, s, h []byte) bool {
-    hasher := sha256.New()
-  
-    hasher.Write(s)
-    hasher.Write(p)
-  
-    for i := 0; i &lt; len(peppers); i++ {
-      if bytes.Equal(hasher.Sum(peppers[i]), h) {
-        return true
-      }
+
+  hasher.Reset() // we didn't get a hit, either our input is incorrect, or our pepper was wrong, let's try again
+}
+</code></pre>
+<p>We'd also no longer need to generate our pepper in our initial hash operation, we could just choose one of our precomputed values as follows:</p>
+<pre><code>func pepper() []byte {
+  mrand.Seed(time.Now().UnixNano())
+  return peppers[mrand.Intn(len(peppers))]
+}
+</code></pre>
+<p>Another thing to note is the order of our hash operations. We're applying salt &gt; pepper &gt; password, then resetting our hasher to try again. <code>hasher.Sum()</code> doesn't change the underlying hash state, so it would be much better to apply salt &gt; password and then just continually <code>Sum(pepper[i])</code> without needing to <code>hasher.Reset()</code>. Nice.</p>
+<p>Let's see where we are at now:</p>
+<pre><code>// Precomputed peppers generated by go generate
+const peppers = [][]byte{
+  []byte{0x31, 0x31, 0x31, 0x31},
+  []byte{0x31, 0x31, 0x31, 0x32},
+  ...
+  []byte{0x39, 0x39, 0x39, 0x39},
+}
+
+func pepper() []byte {
+  mrand.Seed(time.Now().UnixNano())
+  return peppers[mrand.Intn(len(peppers))]
+}
+
+func sha256WithSaltAndPepper(p []byte) (h, s []byte) {
+  hasher := sha256.New()
+  s = salt()
+  hasher.Write(s)
+  hasher.Write(p)
+
+  return hasher.Sum(pepper()), s
+}
+
+func verifySHA256WithSaltAndPepper(p, s, h []byte) bool {
+  hasher := sha256.New()
+
+  hasher.Write(s)
+  hasher.Write(p)
+
+  for i := 0; i &lt; len(peppers); i++ {
+    if bytes.Equal(hasher.Sum(peppers[i]), h) {
+      return true
     }
-  
-    return false
   }
-  </code></pre>
-  <p>The utility of peppering here would be comparable to the concept of 'cost' found in several hashing algorithms like bcrypt or argon2; a mechanism for increasing the effort required to brute-force. In those implementations, we can just increase our cost (bcrypt) or memory/threads/time params (argon2) to increase the work needed to brute-force. We can apply a similar logic to both the length of our salt, and also the available runes to fine tune our implementation as well. An API for that could be as follows:</p>
-  <pre><code>
-    func sha256WithSaltAndPepper(p []byte, pepLen, pepDepth int) (p, s []byte) {}
-    func verifySHA256WithSaltAndPepper(p, s []byte, pepLen, pepDepth int) bool {}
-  </code></pre>
-  <p>In reality, we haven't really gained anything here. You should definitely prefer bcrypt/pbkdf2/argon2 as your password hashing algorithm of choice, and their inherent cost mechanisms will cover your resource-imposed requirements here. The randomisation isn't going to help us much in negating timing attacks either, because you should be aiming for <em>consistent response times</em> for login operations, not randomised.</p>
-  <p>So while this may not be the most practical adventure, it was fun, and I certainly learned a few things.
-      </div>
-      <script src="../highlight.pack.js"></script>
-      <script>
-      window.onload = function(){var aCodes=document.getElementsByTagName('pre');for(var i=0;i<aCodes.length;i++) {hljs.highlightBlock(aCodes[i]);}};
-      </script>
-    </body>
-  </html></p>
+
+  return false
+}
+</code></pre>
+<p>The utility of peppering here would be comparable to the concept of 'cost' found in several hashing algorithms like bcrypt or argon2; a mechanism for increasing the effort required to brute-force. In those implementations, we can just increase our cost (bcrypt) or memory/threads/time params (argon2) to increase the work needed to brute-force. We can apply a similar logic to both the length of our salt, and also the available runes to fine tune our implementation as well. An API for that could be as follows:</p>
+<pre><code>func sha256WithSaltAndPepper(p []byte, pepLen, pepDepth int) (p, s []byte) {}
+func verifySHA256WithSaltAndPepper(p, s []byte, pepLen, pepDepth int) bool {}
+</code></pre>
+<p>In reality, we haven't really gained anything here. You should definitely prefer bcrypt/pbkdf2/argon2 as your password hashing algorithm of choice, and their inherent cost mechanisms will cover your resource-imposed requirements here. The randomisation isn't going to help us much in negating timing attacks either, because you should be aiming for <em>consistent response times</em> for login operations, not randomised.</p>
+<p>So while this may not be the most practical adventure, it was fun, and I certainly learned a few things.</p>
+    </div>
+    <script src="../highlight.pack.js"></script>
+    <script>
+    window.onload = function(){var aCodes=document.getElementsByTagName('pre');for(var i=0;i<aCodes.length;i++) {hljs.highlightBlock(aCodes[i]);}};
+    </script>
+  </body>
+</html>
