@@ -10,11 +10,11 @@
       <p><a href="https://samheslop.com" class="me">Sam Heslop</a><p>
     </div>
     <div id="md">
-      <h1 id="20180506notesonimplementingecdsahmacingo">2018-05-06: Notes on Implementing ECDSA/HMAC in Go</h1>
+      <h1 id="20180506notesonimplementingecdsahmac">2018-05-06: Notes on Implementing ECDSA/HMAC</h1>
 <p>Go has great stdlib support for both symmertic and asymmetric message signing (in the form of crypto/hmac and crypto/ecdsa respectively), but there are a few more things to consider other than just the base primatives when using these packages in the wild. In this post, I'll give a brief outline of these other considerations we should acknowledge, specifically when attempting to sign HTTP requests using ECDSA, even though lots of the points outlined are also applicable to HMACs.  </p>
 <h2 id="aquickecdsaprimer">A Quick ECDSA Primer</h2>
-<p>Digital signatures are used to verify both the integrity (that the request has not been modified during transmission) and authorisation (verifying the identity of the sender) of some information. The unique <a href="https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/">mathmatical properties of elliptical curves</a> gives us a unique trapdoor (easy one way, near impossible to reverse) function that gives us the assurance only an actor with the private key will be able to produce a valid signature.</p>
-<p><strong>Knowing this, we can sign a request with following process (using crypto/ecdsa):</strong></p>
+<p>Digital signatures are used to verify both the integrity (that the request has not been modified during transmission) and authorisation (verifying the identity of the sender) of some information. The unique <a href="https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/">mathmatical properties of elliptical curves</a> gives us a unique trapdoor (easy one way, near impossible to reverse) function that gives us the assurance only an actor with the private component will be able to produce a valid signature.</p>
+<p><strong>Knowing this, we can sign a request with following process:</strong></p>
 <ul>
 <li>A digest is calcuated from all the key components of our request (i.e everything that impacts the way our server will handle the request)</li>
 <li>Said digest is signed with a the private ECDSA key</li>
@@ -38,7 +38,7 @@
 <li>Replay - e.g replaying a previous request, perhaps duplicating a previously successful bank transfer</li>
 <li>Delay - e.g intercepting a request and delaying it's reception until a later date (perhaps in co-ordination with another phase of an attack)</li>
 </ul>
-<p>We need to ensure that, in addition to secure cryptographic primiatives, our protocol protects us from each and every of these considerations. The key here is to consider all these properties into our digest, as well as introducing some new values to the message, before signing.</p>
+<p>We need to ensure that, in addition to secure cryptographic primiatives, our protocol protects us from each and every one of these considerations. The key here is to include all these properties into our digest, as well as introducing some new values to the message, before signing.</p>
 <h2 id="hashingallkeyrequestproperties">Hashing all key request properties</h2>
 <p>Ideally, we'd just like to hash absolutely everything in our request, this way we can be sure nothing has changed in transit. Unfortunately, the real world gets in the way here. Mostly, request headers can be added, removed, case modified or straight up renamed by intrusive HTTP frameworks/load balancers. Many headers won't actually modify the behaviour of the server, but there are some that definitely will (like an Authorization header), which we will certainly want to include in our digest. Headers aren't the only thing that might be modified; protocols can be upgraded/downgraded, proxies can interfere with origins etc. In reality, we need to be able to configure exactly what is and isn't considered in our digest, while also ensuring the things that definitely <em>should</em> be considered always are.</p>
 <h2 id="nonces">Nonces</h2>
