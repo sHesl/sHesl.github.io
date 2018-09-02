@@ -39,15 +39,20 @@ a span:hover {
   color: #b3b3b3;
 }
 
-h2 {
-  color: #b3b3b3;
-}
-
 h1, h2 {
   width: 100%;
   margin: 50px auto 50px auto;
   text-align: center;
   font-weight: normal !important;
+}
+
+h2 {
+  color: #b3b3b3;
+}
+
+::selection {
+  background-color: #f4895a;
+  color: #fff;
 }
 
 #icons {
@@ -79,7 +84,7 @@ h1, h2 {
 }
 
 #entries a:hover {
-  color: #469bd8;
+  color: #F0735A;
 }
 
 #md {
@@ -91,9 +96,20 @@ h1, h2 {
   text-align: left !important;
 }
 
+.block {
+  display: block;
+}
+
+.orange {
+  color: #F0735A;
+}
+
+.light-grey-text {
+  color: #a5a5a5;
+}
+
 .me {
-   color: #F0735A;
-   font-size: 1.45em;
+  font-size: 1.45em;
 }
 
 .divider {
@@ -108,6 +124,40 @@ h1, h2 {
   border-bottom: solid 1px #000;
 }
 
+.cv {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin: auto;
+}
+
+.cv-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 7%;
+}
+
+.cv-row ul {
+  padding: 0;
+}
+
+.cv-date {
+  display: inline-block;
+  min-width: 4%;
+  font-size: 0.9em;
+  color: #757575;
+  margin: 0.5% 0%;
+}
+
+.cv-role {
+  font-size: 1.5em;
+  line-height: 2em;
+}
+
+.technologies, .contributions {
+  display: block;
+  margin: 1% 2.5%;
+}
 
 /* HighlightJS theme */
 /*
