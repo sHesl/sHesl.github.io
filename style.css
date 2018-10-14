@@ -4,6 +4,9 @@ html {
   
   font-family: 'Oxygen', 'Garabond', 'Times', 'Times New Roman', serif;
   font-size: 1.0em;
+
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
@@ -27,16 +30,15 @@ p {
 a {
   text-decoration: none;
   cursor: pointer;
-  color: #469bd8;
+  color: #F0735A;
 }
 
 a span {
-  color: #b3b3b3;
   margin-right: 8px;
 }
 
-a span:hover {
-  color: #b3b3b3;
+a span:hover, a:hover {
+  color: #FF9B0D;
 }
 
 h1, h2 {
@@ -60,7 +62,7 @@ h2 {
   flex-direction: row;
   justify-content: space-between;
   height: 40px;
-  width: 8%;
+  width: 33%;
   margin: 0 auto;
   margin-top: 25px;
   min-width: 145px;
@@ -114,14 +116,14 @@ h2 {
 
 .divider {
   width: 3vw;
-  margin: 16 auto 36 auto;
+  margin: 22 auto 20 auto;
   border-bottom: solid 1px #f4895a;
 }
 
-.tiny-divider{
-  width: 0.5vw;
-  margin: 36 auto 36 auto;
-  border-bottom: solid 1px #000;
+#ramblings {
+  margin: 15px auto 15px auto;
+  color: #a5a5a5;
+  font-size: 20;
 }
 
 .cv {
