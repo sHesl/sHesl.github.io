@@ -132,7 +132,7 @@
 </code></pre>
 <p>Nothing too exciting going on here. The modulo math is fairly straight forward, first using a modulo expression * 10 to produce a multiple of 10 with the addition of the result of a second modulo expression to produce a value between 0 and 99. I chose the indexes of 8 and 31 randomly, knowing the block manipulations steps in the SHA512 implementation are designed to give no individual bit greater significance than any other. </p>
 <h2 id="wrappingup">Wrapping Up</h2>
-<p>As expected, we can rely on the inate properties of hash functions and a little bit of modulo math to bucket arbitrary strings deterministically. Cool. This ended up being easier than I expected, but I'm glad I went through it regardless.</p>
+<p>As expected, we can rely on the innate properties of hash functions and a little bit of modulo math to bucket arbitrary strings deterministically. The implementation itself is trivial, and we can easily build a test suite that ensures it behaves as expected for a wide range of inputs.</p>
     </div>
     <script src="../highlight.pack.js"></script>
     <script>
