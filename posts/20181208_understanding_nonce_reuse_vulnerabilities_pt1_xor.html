@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <title>Sam Heslop</title>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/jpeg" href="../favicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <link href="https://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet">
+  </head>
+  <body>
+    <div>
+      <p><a href="https://samheslop.com" class="me">Sam Heslop</a><p>
+    </div>
+    <div id="md">
+      <h1 id="understandingnoncereusevulnerabilitiespt1xor">Understanding Nonce Reuse Vulnerabilities Pt.1: XOR</h1>
+<p>I recently came across the <a href="https://github.com/miscreant/miscreant">miscreant</a> library, and read through it’s enlightening (and slightly terrifying) explanation of the dangers of nonce reuse in vulnerable symmetrical encryption algorithms. My wider reading on the subject helped build up my understanding, but I still wanted to see some of the concepts about XOR and nonces (two things fundamental to this topic), explained via code; as well as a concrete example of how an attacker might exploit this in the wild.</p>
+<p>This sounds like a good opportunity to run a quick refresher and go back to the basics of XOR and of nonces. Once I’ve done that, I can try and flesh out a real world example where this attack could be performed. There is quite a lot to digest here, so I’ll split this up into a few posts, this one serving as the first and dedicated to a rundown of XOR and how it plays an important role in the bigger picture of nonce reuse vulnerabilities.   </p>
+<h2 id="xorakaexclusiveorakaexclusivedisjunctionakaeitheroneistrueoroneisfalsebutnotboth">XOR aka `exclusive or’ aka exclusive disjunction’ aka ‘either one is true or one is false, but not both’</h2>
+<p>Let’s start with our basic bytewise XOR implementation, leveraging Go’s built in XOR (^) operator that performs a bitwise XOR against each bit in each byte.</p>
+<pre><code>func xor(a, b []byte) []byte {
+    // Determine the shortest input, this is the furthest byte we can XOR
+    l := len(a)
+    if len(b) &lt; l {
+        l = len(b)
+    }
+
+    output := make([]byte, l)
+    for i := 0; i &lt; l; i++ {
+        output[i] = a[i] ^ b[i] 
+    }
+
+    return output
+}
+</code></pre>
+<p>Let’s run over a few of the basic properties of XOR.</p>
+<pre><code>// Property 1: XOR can produce values greater than and smaller than its inputs
+fmt.Printf("2^65 = %d\n", []byte{2 ^ 65})     // 67
+fmt.Printf("121^66 = %d\n", []byte{121 ^ 66}) // 59
+
+// Property 2: Different inputs can XOR to the same result
+fmt.Printf("0^15 = %d\n", []byte{0 ^ 15}) // 15
+fmt.Printf("5^10 = %d\n", []byte{5 ^ 10}) // 15
+fmt.Printf("9^6  = %d\n", []byte{9 ^ 6})  // 15
+fmt.Printf("3^12 = %d\n", []byte{3 ^ 12}) // 15
+fmt.Printf("7^8  = %d\n", []byte{7 ^ 8})  // 15
+
+// Property 3: XOR is commutative (order of inputs does not matter)
+bytes.Equal(5^10, 10^5) // true
+
+// Property 4: XORing a value with zeros will simply return the original value again...
+message := []byte("message here")
+zeros := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+fmt.Printf("%s\n", xor(message, zeros)) // "message here"
+
+// Property 5: ... while XORing a value with itself will produce only zeros
+m := []byte("secret value")
+fmt.Printf("%X\n", xor(m, m)) // "000000000000000000000000"
+
+// Property 6: With only the XOR'd output, we have no way to infer the 2 original values...
+xord := []byte{...} // seemingly random stream of bytes created by xor'ing a message and OTP
+message := ??
+pad := ??
+
+// Property 7: ... but with access to two out of the three values (message or pad alongside xor'd output),  
+// we can XOR those two values together to reveal the value of the third
+xord := xor(pad, message)
+pad == xor(xord, message) // true
+message == xor(xord, pad) // true
+</code></pre>
+<p>Property 7 is particularly interesting of these for the context of symmetrical encryption, for it is simultaneously the characteristic that can make XOR cryptographically weak in isolation, but also valuable as part of block cipher construction.</p>
+<p>Here’s a quick demonstration of this cryptographic weakness via a known-plaintext attack.</p>
+<pre><code>unknownKey := make([]byte, 24)
+rand.Read(unknownKey)
+
+knownPlaintext := []byte("I know the plaintext....")
+ciphertext := xor(knownPlaintext, unknownKey)
+
+unknownKey = nil // Oh no, the value of the key has been lost forever! ..... or has it?
+
+fmt.Printf("By the power of XOR, here is the key: %X", xor(knownPlaintext, ciphertext)) // 80EE28373068D419FB0BC02E19D66358C4C4E9301C3F8969
+</code></pre>
+<p>Yet this reversibility proves to be incredibly useful during block cipher construction for symmetrical encryption algorithms. They are part of the secret sauce that makes <a href="https://en.wikipedia.org/wiki/Feistel_cipher">Fiestel Networks</a> work, allowing (mostly) the same code to be used for both encryption and decryption. You can see this in action inside Go’s Blowfish implementation, specifically <a href="https://github.com/golang/crypto/blob/master/blowfish/block.go#L115">encryptBlock</a> and <a href="https://github.com/golang/crypto/blob/master/blowfish/block.go#L138">decryptBlock</a> where you can see the process being applied in reverse between encryption and decryption. Each step is subject to a XOR operation (which we know is reversible if we know the key), and an obfuscation function which is also reversible (here by traversing backwards through the p-array instead of forwards).</p>
+<p>The result is an algorithm with near identical encryption and decryption steps, easing construction, simplifying implementation and halving the LOCs/memory footprint of an implementation (massively beneficial for hardware). Being able to 'go both ways' is is what gives the symmetry to symmetrical encryption, and is why XOR is so heavily employed in block ciphers. </p>
+<h2 id="wrappingup">Wrapping Up</h2>
+<p>XOR is found everywhere in symmetrical encryption algorithms for it’s speed, simplicity and reversibility. However, it is this property of reversibility that gives a cryptanalysist the means by which to exploit these ‘nonce-reuse’ vulnerable algorithms. In order to do that they’ll naturally need a ‘reused nonce’, so in the next post let’s look into the role of the nonces in symmetrical encryption algos.</p>
+    </div>
+    <script src="../highlight.pack.js"></script>
+    <script>
+    window.onload = function(){var aCodes=document.getElementsByTagName('pre');for(var i=0;i<aCodes.length;i++) {hljs.highlightBlock(aCodes[i]);}};
+    </script>
+  </body>
+</html>
