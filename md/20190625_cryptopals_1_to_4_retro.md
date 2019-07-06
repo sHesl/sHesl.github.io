@@ -25,12 +25,12 @@ Equally importantly though, they’ve helped me see that even a mere mortal such
 
 In the future, I think the first thing I’ll look to do when meeting a new primitive will be just to re-implement it myself, working from an RFC or some pseudo-code or even just refactoring a proven implementation in my language. 
 
-Solutions at https://github.com/sHesl/cryptopals!
+[My solutions are available here, I hope they prove insightful to someone](https://github.com/sHesl/cryptopals)    
 
-# Useful resources!
-https://github.com/FiloSottile/mostly-harmless/tree/master/cryptopals
-https://www.youtube.com/watch?v=eE_Tz6udUQU&t=16s
-https://robertheaton.com/2013/07/29/padding-oracle-attack/
+### Useful resources!
+[Filippo Valsorda's solutions](https://github.com/FiloSottile/mostly-harmless/tree/master/cryptopals)    
+[Filippo also live streamed his sessions, what a legend!](https://www.youtube.com/watch?v=eE_Tz6udUQU&t=16s)    
+[Super useful post on Padding oracle attacks from Robert Heaton](https://robertheaton.com/2013/07/29/padding-oracle-attack/)    
 
 
-On to set 5!
+## On to set 5!
