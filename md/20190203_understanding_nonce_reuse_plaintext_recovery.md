@@ -1,6 +1,6 @@
 # Understanding Nonce Reuse Plaintext Recovery
 
-I recently came across the [miscreant](https://github.com/miscreant/miscreant) library, and read through its enlightening (and slightly terrifying) explanation of the dangers of nonce reuse in vulnerable symmetrical encryption algorithms. My wider reading on the subject helped build up my understanding, but I still wanted to see some of these concepts (specifically those around XOR and nonces, two things fundamental to this topic), explained via code; as well as a concrete example of how an attacker might exploit this in the wild.
+I recently came across the [miscreant](https://github.com/miscreant/miscreant) library, and read through its enlightening (and slightly terrifying) explanation of the dangers of nonce reuse in vulnerable symmetrical encryption algorithms. My wider reading on the subject helped build up my understanding, but I still wanted to see a concrete example of how an attack actually works.
 
 To express this, I think it would be best to work through backwards, first showing a code example of how such a plaintext recovery would work, and then look into the specifics of what allows this recovery to take place.
 
@@ -24,80 +24,7 @@ output := xor(ciphertext, zerosPayloadCiphertext)
 recoveredPlaintext := xor(output, zerosPlaintext) // "this is our secret message"
 ```
 
-At first glance, we can see a curious looking plaintext (a string consisting entirely of zeros), as well as two XOR operations, using both ciphertext material and plaintext material to recover the plaintext. XOR is clearly crucial to this vulnerability, so let’s start there with a quick refresher on XOR.
-
-## XOR aka ‘exclusive or’ aka ‘exclusive disjunction’ aka ‘either one is true or one is false, but not both’
-
-Let’s start with our basic bytewise XOR implementation, leveraging Go’s built in XOR (^) operator that performs a bitwise XOR against each bit in each byte.
-```
-func xor(a, b []byte) []byte {
-	// Determine the shortest input, this is the furthest byte we can XOR
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-
-	output := make([]byte, l)
-	for i := 0; i < l; i++ {
-		output[i] = a[i] ^ b[i] 
-	}
-
-	return output
-}
-```
-
-Now let’s run over a few of the basic properties of XOR.
-```
-// Property 1: XOR can produce values greater than and smaller than its inputs
-fmt.Printf("2^65 = %d", []byte{2 ^ 65})     // 67
-fmt.Printf("121^66 = %d", []byte{121 ^ 66}) // 59
-
-// Property 2: Different inputs can XOR to the same result
-0 ^ 15 // 15
-5 ^ 10 // 15
-9 ^ 6  // 15
-3 ^ 12 // 15
-7 ^ 8  // 15
-
-// Property 3: XOR is commutative (order of inputs does not matter)
-bytes.Equal(5^10, 10^5) // true
-
-// Property 4: XORing a value with zeros will simply return the original value again...
-message := []byte("message here")
-zeros := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-fmt.Printf("%s\n", xor(message, zeros)) // "message here"
-
-// Property 5: ... while XORing a value with itself will produce only zeros
-m := []byte("secret value")
-fmt.Printf("%X\n", xor(m, m)) // "000000000000000000000000"
-
-// Property 6: With only the XOR'd output, we have no way to infer the 2 original values...
-xord := []byte{...} // seemingly random stream of bytes created by xor'ing a message and OTP
-message := ??
-pad := ??
-
-// Property 7: ... but with access to two out of the three values (message or pad alongside xor'd output),  
-// we can XOR those two values together to reveal the value of the third
-xord := xor(pad, message)
-pad == xor(xord, message) // true
-message == xor(xord, pad) // true
-```
-
-Property 7 is particularly important in the context of symmetrical encryption, for it is the characteristic that makes XOR cryptographically weakness in isolation, but also valuable as part of block cipher construction. This is easy to demonstration through a known-plaintext attack.
-
-```
-unknownKey := make([]byte, 24)
-rand.Read(unknownKey)
-
-knownPlaintext := []byte("I know the plaintext....")
-ciphertext := xor(knownPlaintext, unknownKey)
-
-fmt.Printf("... therefore, by the power of XOR, I also know the key: %X", xor(knownPlaintext, ciphertext)) // 80EE28373068D419FB0BC02E19D66358C4C4E9301C3F8969
-```
-
-Still, this reversibility proves to be incredibly useful during block cipher construction for symmetrical encryption algorithms. This is part of the secret sauce that makes [Fiestel Networks](https://en.wikipedia.org/wiki/Feistel_cipher) and [SP networks](https://en.wikipedia.org/wiki/Substitution%E2%80%93permutation_network) work, XORing blocks together either forward (for encryption) or in reverse (for decryption). The same is true for describing encryption via stream ciphers; a keystream is XOR’d against a plaintext during encryption, and the same keystream is XOR’d against a ciphertext during decryption. 
-
-Predominantly, a keystream is comprised of some combination of a key and a nonce, so let’s also quickly recap how nonces can be used to instantiate keystreams.
+At first glance, we can see a curious looking plaintext (a string consisting entirely of zeros), as well as two XOR operations, using both ciphertext material and plaintext material to recover the plaintext. The secret to understanding this all lies within the nonce. 
 
 ## Nonce aka ‘IV’ aka ‘initialisation vector’ aka ‘number used only once’
 
@@ -109,7 +36,7 @@ A primary differentiator between a nonce and a key is that a nonce does not nece
 
 ## But what does a nonce actually *do*?
 
-The implementation details of the nonce is slightly different between block and stream ciphers (and even between different algorithms). For stream ciphers, a keystream could be created by concatenating the key and the nonce, or perhaps hashing the key and the nonce together to help produce a new key. Block ciphers however, are a bit more interesting when considering the role of the nonce. 
+The implementation details of the nonce is slightly different between block and stream ciphers (and even between different algorithms). For stream ciphers, the key and the nonce are concatenated, or perhaps hashed, to produce a keystream. Block ciphers however, are a bit more interesting when considering the role of the nonce. 
 
 Let’s think back to a fundamental detail of block ciphers; that the output of the previous block is used as the input to the subsequent block. That leaves us with a problem, how do we seed our initial block? If we don’t seed our initial block with some unique or random information, and simply begin by computing our first block against only our key, any messages that begin in an predictable manner (such as communication protocols that use headers or file types with predictable metadata headers), will encrypt in the same manner. If this predictable segment equals or extends the length of the first block, that information will be visible in the resulting ciphertext.
 
@@ -140,6 +67,8 @@ This helps illustrates just how much influence the nonce has over the first bloc
 
 Randomly generated nonces, of equal length to the block length, are used to seed this initial block, which is why they are more often referred to as ‘initialisation vectors’ in the context of block ciphers. Using a different nonce/initialisation vector for each operations means the encryption of the first block begins from a different point, so all subsequent substitutions/permutations/transpositions etc produce different results.
 
+The stream cipher scenario is more straight forward, but it identifies that is not just nonce reuse that can cause catastrophic failures, but all forms of keystream reuse. Imagine for example, that you felt compelled to implement a stream cipher generated from a stream of entropy that you were _absolutely certain_ was not being cloned by an adversary. If that base assumption does not hold, the adversary can perform this exact same attack (encrypting zeros and XOR'ing the ciphertexts) to recover your original message. This is one reason why something like a Mersenne Twister cipher is not recommended for production.
+  
 ## A Scenario to Exploit
 
 So what does a real world exploitation of this look like? First, we will need an encryption implementation that uses a vulnerable cipher; AES-GCM, AES-CTR and ChaCha20Poly1305 are some widely used examples. Of course, it will also need to be incorrectly implemented, reusing nonces between operations; **there are no secure or valid reasonings for reusing a nonce, we can only assume it is an implementation flaw!** Perhaps, messages between parties are ordered, indicating an associated counter value for a CTR cipher to use as a nonce, potentially allowing an attacker to lie about their message order, tricking a server into reusing a previously used nonce multiple times.
