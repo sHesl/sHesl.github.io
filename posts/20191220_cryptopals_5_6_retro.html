@@ -12,9 +12,9 @@
     <div id="md">
       <h1 id="cryptopalssets56retrospective">Cryptopals Sets 5-6: Retrospective</h1>
 <p>Continuing on with the <a href="https://cryptopals.com">Cryptopal challenges</a>, the 5th and 6th sets focused primarily on Diffie-Hellman, RSA and DSA, which means more maths, and for me, that means plenty more confusion. Yet, these are widely used primitives, and primitives that can be insecurely implemented (particularly RSA with it's plethora of <a href="https://blog.trailofbits.com/2019/07/08/fuck-rsa/">widely known pitfalls</a>), so it's worth knowing what mistakes a 'bad' implementation might include.</p>
-<h3 id="cheatsheetcryptography">Cheat-sheet Cryptography</h3>
+<h2 id="cheatsheetcryptography">Cheat-sheet Cryptography</h2>
 <p>The math behind these 3 primitives can be concisely expressed, even though secure implementations must account for a multitude more factors (defensive negotiations, padding, nonce-reuse etc).</p>
-<p>Diffie-Hellman:</p>
+<h3 id="diffiehellman">Diffie-Hellman:</h3>
 <pre><code>p = nistP // can use NIST recommended P or generate one for group
 g = 2 // again, can use NIST or generate one
 
@@ -26,7 +26,7 @@ bobPub   =  (g^^bobPriv) % p
 
 sharedSecret = (alicePub^^bobPriv) % p == (bobPub^^alicePriv) % p
 </code></pre>
-<p>Textbook RSA:</p>
+<h3 id="textbookrsa">Textbook RSA:</h3>
 <pre><code>p = randPrime(keyLen) // a random prime of key len bits
 q = randPrime(keyLen)
 
@@ -41,7 +41,7 @@ pubKey  = {modulus: n, exponent: e}
 ciphertext = (plaintext^^pubKey.e) % pubKey.n
 plaintext  = (ciphertext^^privKey) % pubKey.n
 </code></pre>
-<p>DSA:</p>
+<h3 id="dsa">DSA:</h3>
 <pre><code>p,g,q = dsaParamGen() // or could be preselected
 
 priv = rand(q) // must be less than q
@@ -59,15 +59,15 @@ u1 = ((H(m) * w) % q)
 u2 = (r * w) % q
 v = (((g^^u1) * (g^^u2)) % p ) % q // valid if v == r 
 </code></pre>
-<h3 id="negotiationsareaboutmuchmorethatjustinteroperability">Negotiations are about much more that just interoperability…</h3>
+<h2 id="negotiationsareaboutmuchmorethatjustinteroperability">Negotiations are about much more that just interoperability…</h2>
 <p>Generally, when thinking about interoperability between systems, it can be easy to default to thinking about specifications and protocols; on just getting clients and servers to play nicely. In reality though, negotiations are one of the most obvious attack vectors for an adversary, and time and time again (POODLE, BEAST, and here in challenges like <a href="https://cryptopals.com/sets/5/challenges/35">35</a> and <a href="https://cryptopals.com/sets/5/challenges/37">37</a>), they can exploit implementations that don't defend against malicious intent. Reused or specially crafted parameters, such as providing a zeroed key, can force all operations to become predictable or weaken the outputs of the operation. Any scenario in which a client can suggest parameters is one you should look to harden.</p>
-<h3 id="butwithoutfrequentnegotiationshandshakesyourevulnerabletoofflinedictionaryattacks">… but without frequent negotiations/handshakes, you're vulnerable to offline dictionary attacks.</h3>
+<h2 id="butwithoutfrequentnegotiationshandshakesyourevulnerabletoofflinedictionaryattacks">… but without frequent negotiations/handshakes, you're vulnerable to offline dictionary attacks.</h2>
 <p>If you submit parameters that don't include some element of 'uniqueness' per operation (such as a unique salt per operation, or other random element that changes each time like generating unique keys per operation in Ephemeral DH), you're potentially allowing an adversary to crack or brute-force any secrets you've exchanged. Exchanging such secrets with a malicious server or evesdropper just once could jeopardise the security of all future communications.</p>
-<h3 id="textbookrsaisastrivialtoimplementasthelevelofsecurityitprovides">Textbook RSA is as trivial to implement as the level of security it provides</h3>
+<h2 id="textbookrsaisastrivialtoimplementasthelevelofsecurityitprovides">Textbook RSA is as trivial to implement as the level of security it provides</h2>
 <p>Challenge 39 is about as easy a Cryptopal challenge can be (particularly in Go where the invmod operation is built into the stdlib). Of course, it provides virtually no real security, due to the huge range of known vulnerabilities. <a href="https://crypto.stanford.edu/~dabo/papers/RSA-survey.pdf">This</a> paper is fairly exhaustive on the matter and some of the attacks are included in these cryptopals sets. Some attacks involve fairly esoteric math (like Bleichenbacher's PKCS 1.5 Padding Oracle, eurgh), while others just exploit obvious omissions from the system (such as padding, and safeguards against weak keys/low exponents). RSA is possibly the primitive that you should spend the most time vetting when choosing a library, or better yet, if you can avoid it altogether, avoid it entirely and look into something like (x25519)[https://godoc.org/golang.org/x/crypto/curve25519].</p>
 <h3 id="usefulresources">Useful Resources!</h3>
-<p><a href="https://tools.ietf.org/html/rfc2631">Diffie-Hellman RFC</a>
-<a href="http://archiv.infsec.ethz.ch/education/fs08/secsem/bleichenbacher98.pdf">Bleichenbacher's PKCS 1.5 Padding Oracle Attack</a>
+<p><a href="https://tools.ietf.org/html/rfc2631">Diffie-Hellman RFC</a><br />
+<a href="http://archiv.infsec.ethz.ch/education/fs08/secsem/bleichenbacher98.pdf">Bleichenbacher's PKCS 1.5 Padding Oracle Attack</a><br />
 <a href="https://mailarchive.ietf.org/arch/msg/openpgp/5rnE9ZRN1AokBVj3VqblGlP63QE">Notes on e=3 signature forgery</a></p>
 <h2 id="set7next">Set 7 next…</h2>
     </div>
