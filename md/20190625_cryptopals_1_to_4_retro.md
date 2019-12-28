@@ -29,7 +29,7 @@ In the future, I think the first thing I’ll look to do when meeting a new prim
 
 ### Useful resources!
 [Filippo Valsorda's solutions](https://github.com/FiloSottile/mostly-harmless/tree/master/cryptopals)    
-[Filippo also live streamed his sessions, what a legend!](https://www.youtube.com/watch?v=eE_Tz6udUQU&t=16s)    
+[Filippo also live streamed his Cryptopal sessions](https://www.youtube.com/watch?v=eE_Tz6udUQU&t=16s)    
 [Super useful post on Padding oracle attacks from Robert Heaton](https://robertheaton.com/2013/07/29/padding-oracle-attack/)    
 
 
