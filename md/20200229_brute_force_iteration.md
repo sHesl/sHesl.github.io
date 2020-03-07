@@ -1,5 +1,7 @@
 # Brute Force Iteration
-There exists an entire field of mathematics devoted to selecting particular elements from a set. We have combinations: where a unique combination is based entirely on the selection of elements, and permutations: where both the selection and their order constitutes a unique permutation. When it comes to brute forcing though, we're actually after *permutations with repeats*. Think of a cryptographic key, which will almost certainly contain the same byte multiple times, or a weak password derived entirely from a single, repeated character.
+Sometimes, you don't have very much information to go off when trying to crack some crypto. Maybe you know the length of a given secret, like session cookie of determinate length, and/or maybe you've got some idea of the character set, like knowing a PIN consists only of numeric characters. Maybe you don't even have that much information to begin with. There may be times when you have no better option than to just try _every, single_ option, _one at a time_ until you eventually come across the right answer.  
+
+There exists an entire field of mathematics devoted to selecting particular elements from a set, [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics). Within, we can learn about combinations: where a unique combination is based entirely on the selection of elements, and permutations: where both the selection and their order constitutes a unique permutation. When it comes to brute forcing though, we're actually after *permutations with repeats*. Think of a cryptographic key, which will almost certainly contain the same byte multiple times, or a weak password derived entirely from a single, repeated character.
 
 Unfortunately, including repeats massively increases our search space...
 
@@ -301,4 +303,4 @@ func TestBruteForce(t *testing.T) {
 }
 ```
 
-I originally wrote this to help out with some of the set 7 cryptopal challenges, so now I can get back to those. What about those 'masked searches' that I mentioned earlier? Well, that would be better off as a separate post, because there is lots more to talk about there. For now, we've got a usable brute force iterator that will certainly prove useful for me, hope you can find some applications for it as well!
+What about those 'masked searches' that I mentioned earlier? Well, that would be better off as a separate post, because there is lots more to talk about there. For now, we've got a usable brute force iterator that will certainly prove useful to me, and I hope you can make some use of it as well!

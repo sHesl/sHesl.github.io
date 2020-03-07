@@ -11,7 +11,8 @@
     </div>
     <div id="md">
       <h1 id="bruteforceiteration">Brute Force Iteration</h1>
-<p>There exists an entire field of mathematics devoted to selecting particular elements from a set. We have combinations: where a unique combination is based entirely on the selection of elements, and permutations: where both the selection and their order constitutes a unique permutation. When it comes to brute forcing though, we're actually after <em>permutations with repeats</em>. Think of a cryptographic key, which will almost certainly contain the same byte multiple times, or a weak password derived entirely from a single, repeated character.</p>
+<p>Sometimes, you don't have very much information to go off when trying to crack some crypto. Maybe you know the length of a given secret, like session cookie of determinate length, and/or maybe you've got some idea of the character set, like knowing a PIN consists only of numeric characters. Maybe you don't even have that much information to begin with. There may be times when you have no better option than to just try <em>every, single</em> option, <em>one at a time</em> until you eventually come across the right answer.  </p>
+<p>There exists an entire field of mathematics devoted to selecting particular elements from a set, <a href="https://en.wikipedia.org/wiki/Combinatorics">Combinatorics</a>. Within, we can learn about combinations: where a unique combination is based entirely on the selection of elements, and permutations: where both the selection and their order constitutes a unique permutation. When it comes to brute forcing though, we're actually after <em>permutations with repeats</em>. Think of a cryptographic key, which will almost certainly contain the same byte multiple times, or a weak password derived entirely from a single, repeated character.</p>
 <p>Unfortunately, including repeats massively increases our search space…</p>
 <pre><code>// the number of permutations without repeats is the factoral of the number of elements in the set
 set := []byte("abcd")
@@ -283,7 +284,7 @@ func BruteForceLoopWithPrefix(c chan []byte, alphabet []byte, prefix []byte, l i
     }
 }
 </code></pre>
-<p>I originally wrote this to help out with some of the set 7 cryptopal challenges, so now I can get back to those. What about those 'masked searches' that I mentioned earlier? Well, that would be better off as a separate post, because there is lots more to talk about there. For now, we've got a usable brute force iterator that will certainly prove useful for me, hope you can find some applications for it as well!</p>
+<p>What about those 'masked searches' that I mentioned earlier? Well, that would be better off as a separate post, because there is lots more to talk about there. For now, we've got a usable brute force iterator that will certainly prove useful to me, and I hope you can make some use of it as well!</p>
     </div>
     <script src="../highlight.pack.js"></script>
     <script>
