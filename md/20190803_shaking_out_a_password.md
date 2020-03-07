@@ -41,12 +41,12 @@ lastSqueeze := make([]byte, 16)
 cs.Read(lastSqueeze)
 
 for {
-  // if password meets regex requirements, no more squeezes neccessary
-  if r.Match(lastSqeeze) {
-    return lastSqeeze
+  // if password meets regex requirements, no more squeezes necessary
+  if r.Match(lastSqueeze) {
+    return lastSqueeze
   }
 
-  cs.Read(lastSqeeze) // squeeze another password out
+  cs.Read(lastSqueeze) // squeeze another password out
 }
 ```
 
@@ -71,7 +71,7 @@ cs.Read(output1)
 cs.Read(output2)
 ```
 
-SHAKE is stated to have identical security properties for operations using a customisation string and those not, as well as providing unrelating inputs across operations using a different customisation string, meaning there is no negative security implications for using this additional parameter.
+SHAKE is stated to have identical security properties for operations using a customisation string and those not, as well as providing unrelated inputs across operations using a different customisation string, meaning there is no negative security implications for using this additional parameter.
 
 ## A few final touches...
 Keccak is an uncosted primitive, meaning it isn't, in isolation, suitable for hashing passwords. To alleviate this, we can throw a costed KDF on our master password before 'absorption'. This is also a good time to incorporate our 3rd input, the 'login' (username, customer id, email address etc) for the account we are generating the password for. Argon2 is my go-to for a KDF. 
@@ -122,8 +122,8 @@ func execute(company, login, masterPwd, regex string) ([]byte, error) {
 	out := make([]byte, 16)
 	cs.Read(out)
 
-	lastSqeeze := make([]byte, 20)
-	ascii85.Encode(lastSqeeze, out)
+	lastSqueeze := make([]byte, 20)
+	ascii85.Encode(lastSqueeze, out)
 
 	if regex != "" {
 		r, err := regexp.Compile(regex)
@@ -132,18 +132,18 @@ func execute(company, login, masterPwd, regex string) ([]byte, error) {
 		}
 
 		for {
-			// if password meets regex requirements, no more squeezes neccessary
-			if r.Match(lastSqeeze) {
-				return lastSqeeze, nil
+			// if password meets regex requirements, no more squeezes necessary
+			if r.Match(lastSqueeze) {
+				return lastSqueeze, nil
 			}
 
-			cs.Read(out)                    // squeeze another password out ...
-			ascii85.Encode(lastSqeeze, out) // ...and base85 it
+			cs.Read(out)                     // squeeze another password out ...
+			ascii85.Encode(lastSqueeze, out) // ...and base85 it
 		}
 	}
 
-	return lastSqeeze, nil // no regex specifed, use first squeeze
+	return lastSqueeze, nil // no regex specified, use first squeeze
 }
 ```
 
-Maybe I'll have some one-off use for something like this in the future, but I doubt it. Instead, I'll just consider this a fun exercise in using some fancy new primatives and happily continue using my real password manager :)
+Maybe I'll have some one-off use for something like this in the future, but I doubt it. Instead, I'll just consider this a fun exercise in using some fancy new primitives and happily continue using my real password manager :)

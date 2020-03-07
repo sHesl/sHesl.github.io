@@ -4,13 +4,13 @@ Over the past year, I’ve gone from a ‘full-stack’ developer, to working al
 
 `All I need is a page full of text`
 
-That was the philosophy I followed when designing this site. I wanted to write some blog posts as a personal excersise; the act of transforming concepts and ideas into cohesive prose is a task worth dedicating some time to once in a while. I didn’t have a particular audience in mind (or assume any audience for that matter). I just wanted to focus on the content and not worry about any of the bells and whistles sites are often overencumbered with.
+That was the philosophy I followed when designing this site. I wanted to write some blog posts as a personal exercise; the act of transforming concepts and ideas into cohesive prose is a task worth dedicating some time to once in a while. I didn’t have a particular audience in mind (or assume any audience for that matter). I just wanted to focus on the content and not worry about any of the bells and whistles sites are often overencumbered with.
 
 ## My Requirements
 
 - Posts should be written in markdown
 - Adding a new post should be frictionless
-- Posts shouls contain syntax highlighted code snippets
+- Posts should contain syntax highlighted code snippets
 - Posts should load instantaniously
 - HTTPS
 

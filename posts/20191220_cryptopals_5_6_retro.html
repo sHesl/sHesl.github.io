@@ -31,9 +31,9 @@ sharedSecret = (alicePub^^bobPriv) % p == (bobPub^^alicePriv) % p
 q = randPrime(keyLen)
 
 n = p * q
-totient = p-1 * p-1
+totient = p-1 * q-1
 
-e = 65537 // chosen because it is a Fermat prime
+e = 65537 // chosen because it is a Fermat prime, can be a larger Fermat if you like
 
 privKey = modinv(e, totient)
 pubKey  = {modulus: n, exponent: e}
