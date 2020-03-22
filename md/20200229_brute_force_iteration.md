@@ -233,6 +233,7 @@ func BruteForceLoopWithPrefix(c chan []byte, alphabet []byte, prefix []byte, l i
 	alphabetLen := len(alphabet)
 	b := bytes.Repeat(alphabet[:1], l-len(prefix))
 	b = append(prefix, b...)
+	hit := make([]byte, l)
 
 	prog := make([]int, l)
 
@@ -246,7 +247,8 @@ func BruteForceLoopWithPrefix(c chan []byte, alphabet []byte, prefix []byte, l i
 
 			b[pos] = alphabet[charInc]
 			if pred(b) {
-				c <- b
+				copy(hit, b)
+				c <- hit
 			}
 			prog[pos]++
 		}
