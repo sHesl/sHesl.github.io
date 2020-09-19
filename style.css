@@ -52,6 +52,13 @@ h2 {
   color: #b3b3b3;
 }
 
+img {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  max-height: 20%;
+}
+
 ::selection {
   background-color: #f4895a;
   color: #fff;
