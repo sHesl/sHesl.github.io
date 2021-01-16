@@ -2,9 +2,9 @@ html {
   background-color: #fff;
   color: #4B284B;
   
+  line-height: 1.4;
   font-family: Palatino,Palatino Linotype,Palatino LT STD,Book Antiqua,Georgia,serif; 
   font-size: 1.0em;
-
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
@@ -13,7 +13,7 @@ body {
   display: flex;
   flex-flow: column;
   margin: 0;
-  padding: 42px;
+  padding: 42px 82px;
 }
 
 svg {
@@ -138,6 +138,15 @@ img {
   flex-direction: column;
   width: 60%;
   margin: auto;
+}
+
+.bio {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  margin: auto;
+  padding: 25px;
+  text-align: center;
 }
 
 .cv-row {

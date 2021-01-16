@@ -1,7 +1,7 @@
 const showdown = require('showdown');
 const fs = require('fs');
 
-const converter = new showdown.Converter();
+const converter = new showdown.Converter({strikethrough: true});
 
 const mdDir = './md/';
 const postDir = './posts/';
