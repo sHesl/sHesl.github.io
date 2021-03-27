@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>Sam Heslop</title>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/jpeg" href="../favicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+  </head>
+  <body>
+    <div>
+      <p><a href="https://samheslop.com" class="me">Sam Heslop</a><p>
+    </div>
+    <div id="md">
+      <h1 id="observingcontainerdongke">Observing containerd on GKE</h1>
+<p>With the announcement that <a href="https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#deprecation">Kubernetes is deprecating support for the Docker runtime</a>, GKE admins still using the Docker runtime will want to switch their nodes to use containerd as their container runtime before upgrading to v1.20. This is a straightforward, relatively low-risk change; just changing the configuration of node pools from using the <code>cos</code> (you are using the COS image, right?!), to <code>cos_containerd</code>. The only real preparation needed is to confirm that no existing workloads mount the <code>/var/run/docker.sock</code> socket; that does not exist in the <code>cos_containers</code> image, as it is replaced by <code>/run/containerd/containerd.sock</code>. </p>
+<p>Containerd is thoroughly battle tested, and the Docker runtime already used containerd as the runtime engine under the hood (just alongside a host of other things!), so the change isn't a particularly risky or complex one, but it did get me curious about something; how do we monitor our container runtime in GKE anyway? If you're like me, and looking to make this change in a complex, mission-critical production cluster, you might feel a little better knowing how you can monitor the change.</p>
+<h2 id="logs">Logs</h2>
+<p>The node level logs in Stackdriver include containerd logs. These are pretty chatty, so you probably just want to filter to just errors. Kubelet logs are also available in these node logs, and may suffice to surface containerd/runc problems, but if you do want do go a layer deeper, here's how you find these containerd logs.</p>
+<pre><code>resource.type="k8s_node" 
+jsonPayload._CMDLINE="/usr/bin/containerd" 
+jsonPayload.MESSAGE=~"level=error"
+</code></pre>
+<h2 id="metrics">Metrics</h2>
+<p>Containerd, in conformance with the CRI spec, does expose metrics around the resources. In GKE, these are scraped up by the cadvisor daemon running on your GKE nodes, which you can then scrape into your Prometheus instance by querying <code>/metrics/cadvisor</code> on your kubelets. The full list of metrics is available <a href="https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md">here</a>, which just about matches up to the available <a href="https://github.com/DataDog/integrations-core/blob/master/containerd/metadata.csv">containerd metrics</a>. You can get granularity down to the resource usage of individual containers which is pretty sweet!</p>
+<h2 id="crictl">crictl</h2>
+<p>The final thing I wanted as a comfort before proceeding with the live upgrade for Ravelin was the knowledge I could get <a href="https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md">crictl</a> up and running asap if needed. As crictl runs on the node, this isn't too straight-forward in an setup like ours, where SSH'ing into the node is prohibited at the firewall level. This means, if I want to run a container with the crictl binary, the container needs access the <code>/var/containerd/containerd.sock</code> unix socket, which requires mounting the socket from the host into our container. This is always a security risk; anyone with access to write to the socket can easily priv esc up to root (by making a new container which mounts <code>/</code> from the host =&gt; <code>chroot '/'</code> in this new container). If you're 100% sure you're happy with the crictl image you're about to run (<a href="https://hub.docker.com/r/rancher/crictl">rancher do host an image</a> on dockerhub, but you should 100% vet this before use!), you can do the following:</p>
+<pre><code>kubectl run -i --rm --tty crictl --image=rancher/crictl:v1.19.0 --overrides='
+{
+  "spec": {
+    "containers": [
+      {
+        "stdin": true,
+        "stdinOnce": true,
+        "tty": true,
+        "args": [ "bash" ],
+        "name": "crictl",
+        "image": "rancher/crictl:v1.19.0",
+        "volumeMounts": [{
+          "mountPath": "/run/containerd/containerd.sock",
+          "name": "containerd"
+        }]
+      }
+    ],
+    "volumes": [{
+      "name": "containerd",
+      "hostPath": {"path":"/run/containerd/containerd.sock"}
+    }]
+  }
+}
+'
+</code></pre>
+<p>Mounting that socket might not be available to you (if you very wisely have a policy enforced somewhere that protects this very sensitive component!). Once the container is running, commands like <code>crictl --runtime-endpoint unix:///run/containerd/containerd.sock stats</code> will give you low-level insight into how the runtime is behaving. </p>
+<h2 id="onefinalnoteaboutthatsocket">One final note about that socket</h2>
+<p>So if you did just migrate over from the Docker runtime (the vanilla <code>cos</code> image), you might want to adjust any of your previously defined polices to protect the <code>/var/run/docker.sock</code> socket to cover the <code>/run/containerd/containerd.sock</code> socket instead (as mentioned before, the security considerations are consistent between the runtimes in this regard). As a parting note, here's the <code>kubectl</code> command for checking if any pods are mounting that socket in your cluster.</p>
+<pre><code>kubectl get pods -A \ 
+-o=jsonpath='{range .items[*]}{"\n"}{.metadata.namespace}{":\t"}{.metadata.name}{":\t"}{range .spec.volumes[*]}{.hostPath.path}{", "}{end}{end}' \
+| sort \
+| grep '/run/containerd/containerd.sock'
+</code></pre>
+    </div>
+    <script src="../highlight.pack.js"></script>
+    <script>
+    window.onload = function(){var aCodes=document.getElementsByTagName('pre');for(var i=0;i<aCodes.length;i++) {hljs.highlightBlock(aCodes[i]);}};
+    </script>
+  </body>
+</html>

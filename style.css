@@ -1,10 +1,10 @@
 html {
-  background-color: #fff;
-  color: #4B284B;
+  background-color: #1F2226;
+  color: #C9CACC;
   
   line-height: 1.4;
   font-family: Palatino,Palatino Linotype,Palatino LT STD,Book Antiqua,Georgia,serif; 
-  font-size: 1.0em;
+  font-size: 1em;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
@@ -12,25 +12,20 @@ html {
 body {
   display: flex;
   flex-flow: column;
-  margin: 0;
+  margin: 2% 17.5%;
   padding: 42px 82px;
-}
-
-svg {
-  width: 22px;
-  height: 22px;
 }
 
 p {
   width: 100%;
-  text-align: center;
+  text-align: left;
   margin: 8px auto 16px auto;
 }
 
 a {
   text-decoration: none;
   cursor: pointer;
-  color: #F0735A;
+  color: #F4907C;
 }
 
 a span {
@@ -38,23 +33,24 @@ a span {
 }
 
 a span:hover, a:hover {
-  color: #FF9B0D;
+  color: #FACFC6;
 }
 
-h1, h2 {
+h1 {
   width: 100%;
   margin: 50px auto 50px auto;
-  text-align: center;
   font-weight: normal !important;
+  color: #eee;
 }
 
 h2 {
-  color: #b3b3b3;
+  margin: 50px auto 0px auto;
+  color: #eee;
 }
 
 h3 {
-  color: #f09785;
-  margin: 0px;
+  color: #F4907C;
+  margin: 50px 0px 5px;
 }
 
 img {
@@ -64,105 +60,48 @@ img {
   max-height: 20%;
 }
 
+ul {
+  margin-top: 0px;
+  margin-bottom: 5%;
+}
+
+code {
+  background: #1d1f21;
+}
+
 ::selection {
-  background-color: #f4895a;
+  background-color: #F0735A;
   color: #fff;
 }
 
-#icons {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  height: 40px;
-  width: 33%;
-  margin: 0 auto;
-  margin-top: 25px;
-  min-width: 145px;
-  text-align: center;
-}
-
-#icons a {
-  width: 33%;
-}
-
-#entries {
+.flex-column {
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
 }
 
-#entries a {
+.flex-column a {
   padding-top: 8px;
   cursor: pointer;
-  color: #4B284B;
-}
-
-#entries a:hover {
-  color: #F0735A;
-}
-
-#md {
-  width: 64%;
-  margin: auto;
-}
-
-#md p {
-  text-align: left !important;
+  color: #C9CACC;
 }
 
 .block {
   display: block;
 }
 
-.orange {
+.me {
+  font-size: 1.6em;
   color: #F0735A;
 }
 
-.light-grey-text {
-  color: #a5a5a5;
-}
-
-.me {
-  font-size: 1.45em;
+.me:hover {
+  color: #F5A08F;
 }
 
 .divider {
-  width: 3vw;
-  margin: 1% auto 1% auto;
-  border-bottom: solid 1px #f4895a;
-}
-
-#ramblings {
-  margin: 15px auto 15px auto;
-  color: #a5a5a5;
-  font-size: 20;
-}
-
-.cv {
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-  margin: auto;
-}
-
-.bio {
-  display: flex;
-  flex-direction: column;
-  width: 60%;
-  margin: auto;
-  padding: 25px;
-  text-align: center;
-}
-
-.cv-row {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 7%;
-}
-
-.cv-row ul {
-  padding: 0;
-  margin-top: 0px;
+  width: 30vw;
+  margin: 3% 0 3% 0;
+  border-bottom: solid 1px #F0735A;
 }
 
 .cv-date {
@@ -178,96 +117,73 @@ img {
   line-height: 2em;
 }
 
-.technologies, .contributions {
-  display: block;
-  margin: 1% 2.5%;
+/* HighlightJS theme */
+/* Tomorrow Night Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+  color: #969896;
 }
 
-/* HighlightJS theme */
-/*
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+  color: #cc6666;
+}
 
-Atom One Dark by Daniel Gamage
-Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+  color: #F0735A;
+}
 
-base:    #282c34
-mono-1:  #abb2bf
-mono-2:  #818896
-mono-3:  #5c6370
-hue-1:   #56b6c2
-hue-2:   #61aeee
-hue-3:   #c678dd
-hue-4:   #98c379
-hue-5:   #e06c75
-hue-5-2: #be5046
-hue-6:   #d19a66
-hue-6-2: #e6c07b
+/* Tomorrow Yellow */
+.hljs-attribute {
+  color: #f0c674;
+}
 
-*/
+/* Tomorrow Green but changed to pink by me */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+  color: #F4907C;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+  color: #81a2be;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #b294bb;
+}
 
 .hljs {
   display: block;
   overflow-x: auto;
+  background: #1d1f21;
+  color: #c5c8c6;
   padding: 0.5em;
-  color: #abb2bf;
-  background: #282c34;
-  margin: 32px 0;
-}
-
-.hljs-comment,
-.hljs-quote {
-  color: #5c6370;
-  font-style: italic;
-}
-
-.hljs-doctag,
-.hljs-keyword,
-.hljs-formula {
-  color: #c678dd;
-}
-
-.hljs-section,
-.hljs-name,
-.hljs-selector-tag,
-.hljs-deletion,
-.hljs-subst {
-  color: #e06c75;
-}
-
-.hljs-literal {
-  color: #56b6c2;
-}
-
-.hljs-string,
-.hljs-regexp,
-.hljs-addition,
-.hljs-attribute,
-.hljs-meta-string {
-  color: #98c379;
-}
-
-.hljs-built_in,
-.hljs-class .hljs-title {
-  color: #e6c07b;
-}
-
-.hljs-attr,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-type,
-.hljs-selector-class,
-.hljs-selector-attr,
-.hljs-selector-pseudo,
-.hljs-number {
-  color: #d19a66;
-}
-
-.hljs-symbol,
-.hljs-bullet,
-.hljs-link,
-.hljs-meta,
-.hljs-selector-id,
-.hljs-title {
-  color: #61aeee;
 }
 
 .hljs-emphasis {
@@ -276,8 +192,4 @@ hue-6-2: #e6c07b
 
 .hljs-strong {
   font-weight: bold;
-}
-
-.hljs-link {
-  text-decoration: underline;
 }
