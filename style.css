@@ -12,8 +12,7 @@ html {
 body {
   display: flex;
   flex-flow: column;
-  margin: 2% 17.5%;
-  padding: 42px 82px;
+  margin: 3% 22%;
 }
 
 p {
@@ -80,6 +79,7 @@ code {
 }
 
 .flex-column a {
+  display: table;
   padding-top: 8px;
   cursor: pointer;
   color: #C9CACC;
@@ -115,6 +115,18 @@ code {
 .cv-role {
   font-size: 1.5em;
   line-height: 2em;
+}
+
+@media (max-width:1400px) {
+  html {
+    font-size: 1.5em;
+  }
+
+  body {
+    display: flex;
+    flex-flow: column;
+    margin: 2% 8%;
+  }
 }
 
 /* HighlightJS theme */
