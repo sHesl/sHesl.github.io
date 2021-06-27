@@ -24,7 +24,7 @@ p {
 a {
   text-decoration: none;
   cursor: pointer;
-  color: #F4907C;
+  color: #FF795E;
 }
 
 a span {
@@ -32,7 +32,7 @@ a span {
 }
 
 a span:hover, a:hover {
-  color: #FACFC6;
+  color: #F09785;
 }
 
 h1 {
@@ -48,7 +48,7 @@ h2 {
 }
 
 h3 {
-  color: #F4907C;
+  color: #FF795E;
   margin: 50px 0px 5px;
 }
 
@@ -69,7 +69,7 @@ code {
 }
 
 ::selection {
-  background-color: #F0735A;
+  background-color: #FF795E;
   color: #fff;
 }
 
@@ -91,11 +91,11 @@ code {
 
 .me {
   font-size: 1.6em;
-  color: #F4907C;
+  color: #FF795E;
 }
 
 .me:hover {
-  color: #FACFC6;
+  color: #F09785;
 }
 
 .divider {
@@ -175,7 +175,7 @@ code {
 .hljs-symbol,
 .hljs-bullet,
 .hljs-addition {
-  color: #F4907C;
+  color: #F09785;
 }
 
 /* Tomorrow Blue */
