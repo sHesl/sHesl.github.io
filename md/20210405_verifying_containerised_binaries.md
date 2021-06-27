@@ -1,8 +1,8 @@
 # Verifying Containerised Binaries
 
-Sharing source code is crucially important in allowing the community to audit the security of popular open-source projects and to gaining confidence that distributed software does not contain backdoors, using a chain of trust that looks a little something like this;
+Diligent peer-reviewing and security auditing from the infosec community is crucial to helping us gain the confidence that freely distributed, open-source software is safe to use, using a chain of trust that looks a little something like this;
 
-- source code is available for all parties to audit for backdoors
+- source code is available for all parties to audit for backdoors/security flaws
 - project maintainers share digests for compiled binaries per release/tag
 - community members can cross-reference their binary compiled from publicly shared code against the maintainers list
 
@@ -13,7 +13,7 @@ Here, we're specifically defending against;
 - typosquatting/impersonation, where an adversary outside of the core maintainers of a project pushes an unofficial, backdoored image with the hope their image is mistakenly/carelessly pulled instead of an official version
 
 ## Unpacking an Image
-In order to perform a checksum on the binary distributed inside of an image, we will first need to 'unpack' that image. I like to think of images as a 2d representation of a container, with the filesystem flattened down into layers like it's been through a VacPack. We can re-inflate this image into a filesystem (just as your container runtime does when it launches the container) and use a checksum command like `sha`, targetting the binary in this newly unpacked filesystem. 
+In order to perform a checksum on the binary distributed inside of an image, we will first need to 'unpack' that image. I like to think of images as a 2d representation of a container, with the filesystem flattened down into layers like it's been through a VacPack. We can re-inflate this image into a filesystem (just as your container runtime does when it launches the container) and use a checksum command like `sha`, targeting the binary in this newly unpacked filesystem. 
 
 Using a couple trusty open-source projects, we can do something like the following;
 

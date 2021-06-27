@@ -11,7 +11,7 @@
     </div>
     <div id="md">
       <h1 id="verifyingcontainerisedbinaries">Verifying Containerised Binaries</h1>
-<p>Sharing source code is crucially important in allowing the community to audit the security of popular open-source projects and to gaining confidence that distributed software does not contain backdoors, using a chain of trust that looks a little something like this;</p>
+<p>Diligent peer-reviewing and security auditing from the infosec community is crucial to helping us gain the confidence that freely distributed, open-source software does not contain backdoors, using a chain of trust that looks a little something like this;</p>
 <ul>
 <li>source code is available for all parties to audit for backdoors</li>
 <li>project maintainers share digests for compiled binaries per release/tag</li>
@@ -24,7 +24,7 @@
 <li>typosquatting/impersonation, where an adversary outside of the core maintainers of a project pushes an unofficial, backdoored image with the hope their image is mistakenly/carelessly pulled instead of an official version</li>
 </ul>
 <h2 id="unpackinganimage">Unpacking an Image</h2>
-<p>In order to perform a checksum on the binary distributed inside of an image, we will first need to 'unpack' that image. I like to think of images as a 2d representation of a container, with the filesystem flattened down into layers like it's been through a VacPack. We can re-inflate this image into a filesystem (just as your container runtime does when it launches the container) and use a checksum command like <code>sha</code>, targetting the binary in this newly unpacked filesystem. </p>
+<p>In order to perform a checksum on the binary distributed inside of an image, we will first need to 'unpack' that image. I like to think of images as a 2d representation of a container, with the filesystem flattened down into layers like it's been through a VacPack. We can re-inflate this image into a filesystem (just as your container runtime does when it launches the container) and use a checksum command like <code>sha</code>, targeting the binary in this newly unpacked filesystem. </p>
 <p>Using a couple trusty open-source projects, we can do something like the following;</p>
 <pre><code>skopeo copy docker://rancher/crictl:v1.19.0 oci:crictl:v1.19.0
 sudo umoci unpack --image crictl:v1.19.0 crictl-unpacked
