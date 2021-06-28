@@ -14,5 +14,5 @@ jobs:
         run: |
           git config --global user.name 'sHesl'
           git config --global user.email 'sHesl@users.noreply.github.com'
-          git commit -am ""
+          git commit -am "auto-build :)"
           git push
