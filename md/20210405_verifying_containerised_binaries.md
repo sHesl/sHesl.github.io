@@ -1,15 +1,11 @@
 # Verifying Containerised Binaries
 
-Diligent peer-reviewing and security auditing from the infosec community is crucial to helping us gain the confidence that the freely distributed, open-source software we download online was _actually_ compiled from the same code we can see on Github, using a chain of trust that looks a little something like this;
+We consume so much free, open-source software that we don't often take the time to personally verify that what we're downloading is what we _think_ we're downloading. Luckily though, popular projects are scrutinised by many discerning eyes, willing to take the time to diligently review source-code or locally compile and cross-reference digests. Consider the number of unencrypted cloud credentials, SSH keys and insecure cryptowallets on the average engineer's machine though, we can be sure attackers will never stop trying to trick us into downloading keyloggers and crytopminers and credential harvesters.
 
-- source code is available for all parties to audit for backdoors/malicious code
-- project maintainers share digests for compiled binaries per release/tag
-- you can pull down the source code, compile from source yourself and cross-reference your binaries against the publicly available binaries/maintainer shared digests
+With the rise of containerisation, including the distribution of containerised cli tools, like this [bitnami/kubectl](https://github.com/bitnami/bitnami-docker-kubectl) image or this [crictl image](https://hub.docker.com/r/rancher/crictl) distributed by Rancher that I mentioned in a [previous post](https://samheslop.com/posts/20210325_containerd_on_gke.html), there is a new opportunity attackers can look to exploit; **not many people take the time to vet these images actually contain a binary compiled from open-source code, and not some backdoored/compromised version**.
 
-However, with the rise of containerisation, including the distribution of containerised cli tools, like this [bitnami/kubectl](https://github.com/bitnami/bitnami-docker-kubectl) image or this [crictl image](https://hub.docker.com/r/rancher/crictl) distributed by Rancher that I mentioned in a [previous post](https://samheslop.com/posts/20210325_containerd_on_gke.html), there is an extra layer we must consider; **we now also need to vet that these images contain a binary compiled using that same open-source code, and not some backdoored/compromised version**. 
-
-Here, we're specifically defending against;
-- adversaries who developed and shared useful tools with the intent to distribute backdoored versions in their containers
+Here, we're specifically talking about;
+- adversaries who develop and share useful tools with the intent to distribute backdoored versions in their containers
 - typosquatting/impersonation, where an adversary outside of the core maintainers of a project pushes an unofficial, backdoored image with the hope their image is mistakenly/carelessly pulled instead of an official version
 
 ## Unpacking an Image
