@@ -1,0 +1,18 @@
+name: Build and Push
+on: push
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
+      - run: node build
+      - name: Push
+        run: |
+          git config --global user.name 'sHesl'
+          git config --global user.email 'sHesl@users.noreply.github.com'
+          git commit -am ""
+          git push

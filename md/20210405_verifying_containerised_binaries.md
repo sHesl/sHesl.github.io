@@ -1,10 +1,10 @@
 # Verifying Containerised Binaries
 
-Diligent peer-reviewing and security auditing from the infosec community is crucial to helping us gain the confidence that freely distributed, open-source software is safe to use, using a chain of trust that looks a little something like this;
+Diligent peer-reviewing and security auditing from the infosec community is crucial to helping us gain the confidence that the freely distributed, open-source software we download online was _actually_ compiled from the same code we can see on Github, using a chain of trust that looks a little something like this;
 
-- source code is available for all parties to audit for backdoors/security flaws
+- source code is available for all parties to audit for backdoors/malicious code
 - project maintainers share digests for compiled binaries per release/tag
-- community members can cross-reference their binary compiled from publicly shared code against the maintainers list
+- you can pull down the source code, compile from source yourself and cross-reference your binaries against the publicly available binaries/maintainer shared digests
 
 However, with the rise of containerisation, including the distribution of containerised cli tools, like this [bitnami/kubectl](https://github.com/bitnami/bitnami-docker-kubectl) image or this [crictl image](https://hub.docker.com/r/rancher/crictl) distributed by Rancher that I mentioned in a [previous post](https://samheslop.com/posts/20210325_containerd_on_gke.html), there is an extra layer we must consider; **we now also need to vet that these images contain a binary compiled using that same open-source code, and not some backdoored/compromised version**. 
 
