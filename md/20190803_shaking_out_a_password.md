@@ -146,4 +146,4 @@ func execute(company, login, masterPwd, regex string) ([]byte, error) {
 }
 ```
 
-Maybe I'll have some one-off use for something like this in the future, but I doubt it. Instead, I'll just consider this a fun exercise in using some fancy new primitives and happily continue using my real password manager :)
+Maybe I'll have some one-off use for something like this in the future, but I doubt it. Instead, I'll just consider this a fun exercise in using some fancy new primitives and happily continue using my real password manager.

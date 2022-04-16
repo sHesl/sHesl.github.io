@@ -1,0 +1,140 @@
+## aws-lab-nuke
+
+I have a personal AWS lab account, hooked up to a personal card, which means I'm living life on the edge; just one wrong move away from financial ruin.
+
+Even when I'm personably liable for the spend in my AWS account, I am _still_ too forgetful/distracted/lazy to take much care to delete unused resources. Almost every time I've spun up some resources in my lab, I've failed to clean them all up again once I'm finished, often ending up with a (thankfully small) bill at the end of the month. Looking back over my AWS billing history, I'd say maybe 70% of my spend was for resources, billed hourly, that I'd forgotten to delete (hello VPC endpoints o/).
+
+Billing alerts are fantastic, but I wanted to go a step further and entirely eliminate the possibility of me leaving _any_ AWS resources active in my account at any given time. So I went for the nuclear option...
+
+## cloud-nuke
+[cloud-nuke](https://github.com/gruntwork-io/cloud-nuke/) is a CLI for automating the mass deletion of AWS resources; scanning regions for all provisioned resources and deleting them. It has some nice configuration features as well, such as exemptions for resources by regex or filtering resources by age. I think, due to the destructive power of such a tool, it was originally intended to be used by humans; there is a very dramatic prompt it displayed before firing off any actual delete requests.
+
+```
+THE NEXT STEPS ARE DESTRUCTIVE AND COMPLETELY IRREVERSIBLE, PROCEED WITH CAUTION!!!
+```
+
+Thankfully though, it has a `--force` flag, as all good tools do. This means we can automation this process via a Github action running on a schedule.
+
+## Permissions for cloud-nuke
+For cloud-nuke to scan through an AWS account, it's going to need a lot of `Describe*` and `List*` permissions, in addition to `Delete*` permissions. Some resources also need to be taggable; this is the mechanism cloud-nuke uses to determine if, and when, it has previously seen resources. 
+
+For granting these permissions, I ended up with an IAM policy that looked something like: 
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:Describe*",
+                "autoscaling:Delete*",
+                "dynamodb:ListTables",
+                "dynamodb:ListTagsOfResource",
+                "dynamodb:Delete*",
+                "ec2:CreateTags",
+                "ec2:List*",
+                "ec2:Describe*",
+                "ec2:Delete*",
+                "ec2:Terminate*",
+                "ecs:List*",
+                "ecs:Delete*",
+                "eks:Describe*",
+                "eks:List*",
+                "eks:Delete*",
+                "elasticloadbalancing:Describe*",
+                "elasticloadbalancing:Delete*",
+                "kms:DescribeKey",
+                "kms:Delete*",
+                "kms:List*",
+                "kms:ScheduleKeyDeletion",
+                "lambda:List*",
+                "lambda:Delete*",
+                "secretsmanager:List*",
+                "secretsmanager:Delete*",
+                "s3:List*",
+                "s3:Delete*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+This isn't an exhaustive policy for all the resources cloud-nuke supports, as there are some resources I didn't want to delete, like the IAM roles and OIDC providers I'll be using to automate this job.
+
+## aws-actions/configure-aws-credentials
+There is an official, AWS maintained Github action for enabling Github Actions to assume roles in your AWS account via STS. You can restrict the execution down to actions triggered from a single repo/branch with a trust policy like this:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::$account_id:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                    "token.actions.githubusercontent.com:sub": "repo:$github_user/$repo_name:ref:refs/heads/$branch"
+                }
+            }
+        }
+    ]
+}
+```
+
+Attaching this trust policy to a role (that also has our prior permission policy attached) enables each execution of the Github Action to receive ephemeral credentials for my AWS account that enable cloud-nuke to do it's thing.
+
+For the full details, see these [Github docs](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) and these [AWS docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html) for all the details around setting this up.
+
+## .github/workflows/nuke.yaml
+
+Finally, I just stuck a version of the cloud-nuke binary inside the same github repo the action runs from (so the action doesn't need to download it every run) and configured my github action accordingly:
+
+```
+name: Nuke
+on:
+  schedule:
+    - cron:  "0 5 * * *"
+  workflow_dispatch:
+jobs:
+  run:
+    name: Execute
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Assume aws-lab-nuke role
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/aws-lab-nuke
+        aws-region: eu-west-2
+    - name: cloud-nuke
+      run: |
+        mv ./cloud-nuke_linux_amd64 /usr/local/bin/cloud-nuke
+        chmod u+x /usr/local/bin/cloud-nuke
+        cloud-nuke aws \
+          --resource-type ami \
+          --resource-type dynamodb \
+          --resource-type ec2 \
+          --resource-type ebs \
+          --resource-type elbv2 \
+          --resource-type ecsserv \
+          --resource-type ecscluster \
+          --resource-type ekscluster \
+          --resource-type kmscustomerkeys \
+          --resource-type lambda \
+          --resource-type nat-gateway \
+          --resource-type secretsmanager \
+          --resource-type s3 \
+          --resource-type vpc \
+          --force
+```
+
+It's as simple as that. Now my AWS account is always squeaky clean; no more being charged for idle 
+resources.
