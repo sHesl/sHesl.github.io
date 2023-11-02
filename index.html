@@ -1,51 +1,121 @@
 <html>
-  <head>
-    <title>Sam Heslop</title>
-    <meta charset="utf-8">
-    <link rel="shortcut icon" type="image/jpeg" href="./favicon.ico"/>
-    <link rel="stylesheet" type="text/css" href="./style.css">
-  </head>
-  <body>
-    <div>
-      <p><a href="https://samheslop.com" class="me orange">Sam Heslop</a><p>
-      <p>Software Engineer</p>
+
+<head>
+  <title>Sam Heslop</title>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" type="image/jpeg" href="./favicon.ico" />
+  <link rel="stylesheet" type="text/css" href="./style.css">
+</head>
+
+<body>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <a href=" https://samheslop.com" class="me orange">Sam Heslop</a>
+    <div style="width: 49px; height: 48px;">
+      <a href="https://github.com/sHesl">
+        <svg style="margin-top: 8px;" width="98" height="96">
+          <use style="scale: 0.3" href="#github" />
+        </svg>
+      </a>
     </div>
+  </div>
+  <div>
+    <p>Passionate and multi-skilled software engineer, highly experienced in cloud technologies, with a specialism in
+      cloud security.</p>
+    <p>Architected, developed, secured and operated highly complex distributed systems, at scale, in multiple
+      cloud providers.</p>
+  </div>
+  <div>
     <div class="divider"></div>
-    <h3 style="margin:20px 0px 5px !important;">Experience</h3>
-    <div class="flex-column">
-      <span class="cv-date">2023 Jan - 2023 Sept </span>
-      <span class="cv-role">
-        <b>Senior Backend Engineer</b>
-        <b style="color:#FF795E;"> @ Thought Machine</b> 
-      </span>
+    <p style="margin-bottom:0px;"><b>Skills:</b> Golang, Kubernetes, AWS, GCP, Terraform, PCI DSS, ISO 27001, IAM, SIEM,
+      CI/CD, Applied
+      Cryptography</p>
+  </div>
+  <div class="divider"></div>
+  <h3 style="margin:20px 0px 5px !important;">Experience</h3>
+  <div class="flex-column">
+    <span class="cv-date">2023 Sept - Present</span>
+    <span class="cv-role">
+      <b>Founding Engineer</b>
+      <b style="color:#FF795E;"> @ Cluster Fudge Ltd</b>
+    </span>
+    <span>
+      <li>Cluster Fudge aim to solve infrastructure problems faced when training AI models at scale.</li>
+      <li>Buildings products for observability, debugging, provenance, scheduling and experimentation.</li>
+    </span>
+  </div>
+
+  <div>
+    <br>
+    <br>
+  </div>
+
+  <div class="flex-column">
+    <span class="cv-date">2021 Jun - 2023 Sept </span>
+    <span class="cv-role">
+      <b>Senior Backend Engineer</b>
+      <b style="color:#FF795E;"> @ Thought Machine</b>
+    </span>
+    <span>
+      <li>Security and infrastructure lead on the Vault Payments platform.</li>
+      <li>Architect and lead developer on the infrastructure responsible for handling sensitive card data (PAN, PIN,
+        CVV).</li>
+      <li>SME on PCI DSS (v3.2.1/v4.0) and PCI PIN (v3.1) certifications.</li>
+
+      <br>
+      <br>
+      <li>Joined as a Cloud Security Engineer, improving preventative and detective controls, company-wide.</li>
+      <li>Moved to Senior Software Engineer, implementing auth, networking and operational components of
+        the Vault Payments platform.</li>
+    </span>
+
+    <div>
+      <br>
+      <br>
     </div>
-    <div class="flex-column">
-      <span class="cv-date">2021 Jun - 2023 Jan</span>
-      <span class="cv-role">
-        <b>Cloud Security Engineer</b>
-        <b style="color:#FF795E;"> @ Thought Machine</b> 
-      </span>
-    </div>
-    <div class="flex-column">
-      <span class="cv-date">2019 Jun - 2021 Jun</span>
-      <span class="cv-role">
-        <b>Security Engineer</b>
-        <b style="color:#FF795E;"> @ Ravelin</b> 
-      </span>
-    </div>
-    <div class="flex-column">
-      <span class="cv-date">2017 Jul - 2019 Jun</span>
-      <span class="cv-role">
-        <b>Backend Engineer</b>
-        <b style="color:#FF795E;"> @ Ravelin</b> 
-      </span>
-    </div>
-    <div class="flex-column">
-      <span class="cv-date">2014 Sept - 2017 Jul</span>
-      <span class="cv-role">
-        <b>Software Engineer</b>
-        <b style="color:#FF795E;"> @ The Walt Disney Company</b> 
-      </span>
-    </div>
-  </body>
+
+  </div>
+  <div class="flex-column">
+    <span class="cv-date">2017 Jul - 2021 Jun</span>
+    <span class="cv-role">
+      <b>Security Engineer</b>
+      <b style="color:#FF795E;"> @ Ravelin</b>
+    </span>
+    <span>
+      <li>Ravelin's first dedicated security resource, managing all aspects of company security; cloud, corporate, data,
+        application etc.</li>
+      <li>Worked to introduce and mature all facets of the infosec function; compliance, penetration testing, secops,
+        SDLC etc.</li>
+      <br>
+      <br>
+      <li>Joined as a Back-end Engineer, focusing on API development and data/platform engineering before focusing on
+        security full-time.</li>
+    </span>
+  </div>
+
+  <div>
+    <br>
+    <br>
+  </div>
+
+  <div class="flex-column">
+    <span class="cv-date">2014 Sept - 2017 Jul</span>
+    <span class="cv-role">
+      <b>Software Engineer</b>
+      <b style="color:#FF795E;"> @ The Walt Disney Company</b>
+    </span>
+    <span>
+      <li>Full-stack software engineer contributing to internal licensing and revenue-accounting systems.</li>
+    </span>
+  </div>
+</body>
+
+<!-- Github Logo -->
+<div style="visibility: hidden;">
+  <svg id="github" width="98" height="96" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+      d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
+      fill="#FF795E" />
+  </svg>
+</div>
+
 </html>
