@@ -1,9 +1,9 @@
 html {
   background-color: #1E2835;
   color: #C9CACC;
-  
+
   line-height: 1.4;
-  font-family: Palatino,Palatino Linotype,Palatino LT STD,Book Antiqua,Georgia,serif; 
+  font-family: EuropaGroNr2SH, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, Helvetica Neue, Arial, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   font-size: 1em;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
@@ -31,7 +31,8 @@ a span {
   margin-right: 8px;
 }
 
-a span:hover, a:hover {
+a span:hover,
+a:hover {
   color: #F09785;
 }
 
@@ -90,7 +91,7 @@ code {
 }
 
 .me {
-  font-size: 1.6em;
+  font-size: 4.6em;
   color: #FF795E;
 }
 
